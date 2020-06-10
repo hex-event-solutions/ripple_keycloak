@@ -2,8 +2,9 @@
 
 require 'ripple_keycloak/version'
 require 'ripple_keycloak/client'
-require 'ripple_keycloak/configuration'
 
 module RippleKeycloak
   class Error < StandardError; end
+  class UnauthorizedClientError < StandardError; end
+  class RealmDoesNotExistError < StandardError; end
 end
