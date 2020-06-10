@@ -3,11 +3,8 @@
 module RippleKeycloak
   class Configuration
     attr_accessor :base_url,
+                  :realm,
                   :client_id,
-                  :client_secret,
-                  :access_token,
-                  :refresh_token,
-                  :expires_in,
-                  :refresh_expires_in
+                  :client_secret
   end
 end
