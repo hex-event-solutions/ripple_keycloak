@@ -3,19 +3,20 @@
 require 'httparty'
 require 'active_support/core_ext/module/delegation'
 
+require 'ripple_keycloak/error_handler'
 require 'ripple_keycloak/configuration'
 
 module RippleKeycloak
   class Client
     include HTTParty
-    debug_output $stdout
+    # debug_output $stdout
 
     class << self
       def configure
         @configuration = Configuration.new
         yield(configuration)
         auth
-        'Success'
+        'Authenticated successfully'
       end
 
       def post_formatted(resource, json: true, authed: true, **options)
@@ -31,7 +32,7 @@ module RippleKeycloak
         return_or_raise post("#{base_uri}/#{resource}", options)
       end
 
-      def get_formatted(resource, options = {}, authed: true)
+      def get_formatted(resource, authed: true, **options)
         if authed
           options = add_auth_header(options)
           resource = "admin/realms/#{realm}/" + resource
@@ -55,7 +56,7 @@ module RippleKeycloak
       delegate :raise_error, to: :error_handler
 
       def return_or_raise(response)
-        if response.code == 200
+        if [200, 201, 204].include? response.code
           response
         else
           raise_error response
@@ -63,12 +64,11 @@ module RippleKeycloak
       end
 
       def auth
-        response = post_formatted("realms/#{realm}/protocol/openid-connect/token", {
-                                    body: {
-                                      grant_type: 'client_credentials',
-                                      client_id: client_id,
-                                      client_secret: client_secret
-                                    }
+        response = post_formatted("realms/#{realm}/protocol/openid-connect/token",
+                                  body: {
+                                    grant_type: 'client_credentials',
+                                    client_id: client_id,
+                                    client_secret: client_secret
                                   }, json: false, authed: false)
         update_token_fields response
         access_token
@@ -101,14 +101,14 @@ module RippleKeycloak
       end
 
       def add_header(options, header, value)
-        options[:header] ||= {}
-        options[:header] = options[:header].merge({ "#{header}": value })
+        options[:headers] ||= {}
+        options[:headers] = options[:headers].merge({ "#{header}": value })
         options
       end
     end
 
     def post(resource, body)
-      self.class.post_formatted(resource, { body: body })
+      self.class.post_formatted(resource, body: body)
     end
 
     def get(resource)
