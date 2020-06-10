@@ -24,10 +24,11 @@ module RippleKeycloak
       def create(name:, parent: false, role: false)
         payload = { name: name }
         path = create_path(parent)
-        role_result = find_role(role)
+        role_result = find_role(role) if role
+        
         response = client.post(path, payload)
         group_id = response.headers['location'].split('/').last
-        add_role(group_id, role_result)
+        add_role(group_id, role_result) if role
 
         group_id
       end
