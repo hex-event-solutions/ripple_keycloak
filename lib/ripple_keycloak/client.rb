@@ -32,6 +32,19 @@ module RippleKeycloak
         return_or_raise post("#{base_uri}/#{resource}", options)
       end
 
+      def put_formatted(resource, json: true, authed: true, **options)
+        if authed
+          options = add_auth_header(options)
+          resource = "admin/realms/#{realm}/" + resource
+        end
+        if json
+          options = add_header(options, 'Content-Type', 'application/json')
+          options[:body] = options[:body].to_json
+        end
+
+        return_or_raise put("#{base_uri}/#{resource}", options)
+      end
+
       def get_formatted(resource, authed: true, **options)
         if authed
           options = add_auth_header(options)
@@ -109,6 +122,10 @@ module RippleKeycloak
 
     def post(resource, body)
       self.class.post_formatted(resource, body: body)
+    end
+
+    def put(resource, body)
+      self.class.put_formatted(resource, body: body)
     end
 
     def get(resource)
