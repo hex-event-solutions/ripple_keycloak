@@ -36,6 +36,17 @@ module RippleKeycloak
         user_id
       end
 
+      def add_to_group(user_id, group_id)
+        client.put("users/#{user_id}/groups/#{group_id}", {
+          groupId: group_id,
+          userId: user_id
+        })
+      end
+
+      def remove_from_group(user_id, group_id)
+        client.delete("users/#{user_id}/groups/#{group_id}")
+      end
+
       private
 
       def client
