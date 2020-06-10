@@ -54,6 +54,15 @@ module RippleKeycloak
         return_or_raise get("#{base_uri}/#{resource}", options)
       end
 
+      def delete_formatted(resource, authed: true, **options)
+        if authed
+          options = add_auth_header(options)
+          resource = "admin/realms/#{realm}/" + resource
+        end
+
+        return_or_raise delete("#{base_uri}/#{resource}", options)
+      end
+
       private
 
       attr_accessor :configuration,
@@ -130,6 +139,10 @@ module RippleKeycloak
 
     def get(resource)
       self.class.get_formatted(resource)
+    end
+
+    def delete(resource)
+      self.class.delete_formatted(resource)
     end
 
     def search(type, value)
