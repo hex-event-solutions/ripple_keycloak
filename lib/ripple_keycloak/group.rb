@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'ripple_keycloak/client'
-
 module RippleKeycloak
   class Group
     class << self
@@ -23,12 +21,13 @@ module RippleKeycloak
         client.find_by('groups', field, value)
       end
 
-      def create(name:, parent:, role:)
-        body = { name: name }
+      def create(name:, parent: false, role: false)
+        payload = { name: name }
         path = create_path(parent)
-        response = client.post(path, { body: body })
+        role_result = find_role(role)
+        response = client.post(path, payload)
         group_id = response.headers['location'].split('/').last
-        add_role(group_id, role) if role
+        add_role(group_id, role_result)
 
         group_id
       end
@@ -41,8 +40,10 @@ module RippleKeycloak
 
       def create_path(parent)
         if parent
-          parent_id = find_by(field: 'name', value: parent)
-          path = "groups/#{parent_id}/children"
+          parent_group = find_by(field: 'name', value: parent)
+          raise GroupNotFoundError, parent unless parent_group
+
+          path = "groups/#{parent_group['id']}/children"
         else
           path = 'groups'
         end
@@ -50,7 +51,14 @@ module RippleKeycloak
       end
 
       def add_role(group_id, role)
-        client.post("groups/#{group_id}/role-mappings/realm", { body: [role] })
+        client.post("groups/#{group_id}/role-mappings/realm", [role])
+      end
+
+      def find_role(role)
+        role_result = RippleKeycloak::Role.find_by(field: 'name', value: role)
+        raise RoleNotFoundError, role unless role_result
+
+        role_result
       end
     end
   end
