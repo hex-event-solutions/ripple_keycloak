@@ -4,16 +4,13 @@ module RippleKeycloak
   class ErrorHandler
     class << self
       def raise_error(response)
-        if response.has_key? 'error'
-          error_class = error_from_name(response['error'])
-          if response.has_key? 'error_description'
-            raise error_class, response['error_description']
-          else
-            raise error_class, response
-          end
-        else
-          raise RippleKeycloak::Error, response
-        end
+        raise RippleKeycloak::Error, response unless response.key? 'error'
+
+        error_class = error_from_name(response['error'])
+
+        raise error_class, response['error_description'] if response.key? 'error_description'
+
+        raise error_class, response
       end
 
       def error_from_name(name)
