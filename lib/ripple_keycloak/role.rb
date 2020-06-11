@@ -9,6 +9,13 @@ module RippleKeycloak
         client.find_by('roles', field, value)
       end
 
+      def create(name:)
+        response = client.post('roles', payload)
+        role_id = response.headers['location'].split('/').last
+
+        role_id
+      end
+
       private
 
       def client
