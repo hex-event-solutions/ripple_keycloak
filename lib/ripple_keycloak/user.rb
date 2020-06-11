@@ -21,17 +21,24 @@ module RippleKeycloak
         client.find_by('users', field, value)
       end
 
-      def create(**properties)
-        missing_properties = required_properties - properties.keys
+      # def create(**properties)
+      #   missing_properties = required_properties - properties.keys
 
-        raise MissingPropertyError, missing_properties if missing_properties.any?
+      #   raise MissingPropertyError, missing_properties if missing_properties.any?
 
-        payload = user_payload(properties)
+      #   payload = user_payload(properties)
 
+      #   response = client.post('users', payload)
+      #   user_id = response.headers['location'].split('/').last
+
+      #   send_user_email(user_id, properties[:client_id], properties[:redirect_uri])
+
+      #   user_id
+      # end
+
+      def create(payload)
         response = client.post('users', payload)
         user_id = response.headers['location'].split('/').last
-
-        send_user_email(user_id, properties[:client_id], properties[:redirect_uri])
 
         user_id
       end
@@ -47,39 +54,40 @@ module RippleKeycloak
         client.delete("users/#{user_id}/groups/#{group_id}")
       end
 
+      def send_email(user_id, actions, lifespan: 86400, client_id: false, redirect_uri: false)
+        url = "users/#{user_id}/execute-actions-email?"
+        url += "?lifespan=#{lifespan}"
+        url += "&client_id=#{client_id}" if client_id
+        url += "&redirect_uri=#{redirect_uri}" if redirect_uri
+
+        client.put(url, actions)
+      end
+
       private
 
       def client
         RippleKeycloak::Client.new
       end
 
-      def required_properties
-        %i[email first_name last_name phone client_id redirect_uri]
-      end
+      # def required_properties
+      #   %i[email first_name last_name phone client_id redirect_uri]
+      # end
 
-      def user_payload(properties)
-        {
-          username: properties[:email],
-          email: properties[:email],
-          firstName: properties[:first_name],
-          lastName: properties[:last_name],
-          enabled: "true",
-          requiredActions: ['UPDATE_PASSWORD'],
-          attributes: {
-            phone: properties[:phone]
-          }
-        }
-      end
+      # def user_payload(properties)
+      #   {
+      #     username: properties[:email],
+      #     email: properties[:email],
+      #     firstName: properties[:first_name],
+      #     lastName: properties[:last_name],
+      #     enabled: "true",
+      #     requiredActions: ['UPDATE_PASSWORD'],
+      #     attributes: {
+      #       phone: properties[:phone]
+      #     }
+      #   }
+      # end
 
-      def send_user_email(user_id, client_id, redirect_uri)
-        client.put(
-          "users/#{user_id}/execute-actions-email?" \
-          'lifespan=86400&' \
-          "client_id=#{client_id}&" \
-          "redirect_uri=#{redirect_uri}",
-          ['UPDATE_PASSWORD, VERIFY_EMAIL']
-        )
-      end
+
     end
   end
 end
