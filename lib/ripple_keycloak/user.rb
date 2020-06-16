@@ -1,41 +1,10 @@
 # frozen_string_literal: true
 
 module RippleKeycloak
-  class User
+  class User < BaseModel
+    object_type 'users'
+
     class << self
-      delegate :get, :post, to: :client
-
-      def search(value)
-        client.search('users', value)
-      end
-
-      def all
-        client.get('users')
-      end
-
-      def find(id)
-        client.get("users/#{id}")
-      end
-
-      def find_by(field:, value:)
-        client.find_by('users', field, value)
-      end
-
-      # def create(**properties)
-      #   missing_properties = required_properties - properties.keys
-
-      #   raise MissingPropertyError, missing_properties if missing_properties.any?
-
-      #   payload = user_payload(properties)
-
-      #   response = client.post('users', payload)
-      #   user_id = response.headers['location'].split('/').last
-
-      #   send_user_email(user_id, properties[:client_id], properties[:redirect_uri])
-
-      #   user_id
-      # end
-
       def create(payload)
         response = client.post('users', payload)
         user_id = response.headers['location'].split('/').last
@@ -54,6 +23,16 @@ module RippleKeycloak
         client.delete("users/#{user_id}/groups/#{group_id}")
       end
 
+      def add_role(user_id, role_name)
+        role = RippleKeycloak::Role.find_by(field: 'name', value: role_name)
+        client.post("users/#{user_id}/role-mappings/realm", [role])
+      end
+
+      def remove_role(user_id, role_name)
+        role = RippleKeycloak::Role.find_by(field: 'name', value: role_name)
+        client.delete("users/#{user_id}/role-mappings/realm", [role])
+      end
+
       def send_email(user_id, actions, lifespan: 86400, client_id: false, redirect_uri: false)
         url = "users/#{user_id}/execute-actions-email?"
         url += "?lifespan=#{lifespan}"
@@ -62,32 +41,6 @@ module RippleKeycloak
 
         client.put(url, actions)
       end
-
-      private
-
-      def client
-        RippleKeycloak::Client.new
-      end
-
-      # def required_properties
-      #   %i[email first_name last_name phone client_id redirect_uri]
-      # end
-
-      # def user_payload(properties)
-      #   {
-      #     username: properties[:email],
-      #     email: properties[:email],
-      #     firstName: properties[:first_name],
-      #     lastName: properties[:last_name],
-      #     enabled: "true",
-      #     requiredActions: ['UPDATE_PASSWORD'],
-      #     attributes: {
-      #       phone: properties[:phone]
-      #     }
-      #   }
-      # end
-
-
     end
   end
 end
