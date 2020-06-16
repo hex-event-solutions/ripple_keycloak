@@ -1,42 +1,10 @@
 # frozen_string_literal: true
 
 module RippleKeycloak
-  class Group
+  class Group < BaseModel
+    object_type 'groups'
+
     class << self
-      delegate :get, :post, to: :client
-
-      def search(value)
-        client.search('groups', value)
-      end
-
-      def all(first: nil, max: nil)
-        url = "groups?"
-        url += "first=#{first}" if first
-        url += "max=#{max}" if max
-
-        client.get(url)
-      end
-
-      def find(id)
-        client.get("groups/#{id}")
-      end
-
-      def find_by(field:, value:)
-        client.find_by('groups', field, value)
-      end
-
-      # def create(name:, parent: false, role: false)
-      #   payload = { name: name }
-      #   path = create_path(parent)
-      #   role_result = find_role(role) if role
-
-      #   response = client.post(path, payload)
-      #   group_id = response.headers['location'].split('/').last
-      #   add_role(group_id, role_result) if role
-
-      #   group_id
-      # end
-
       def create(name:, parent: false)
         payload = { name: name }
         path = create_path(parent)
@@ -46,11 +14,17 @@ module RippleKeycloak
         group_id
       end
 
-      private
-
-      def client
-        RippleKeycloak::Client.new
+      def add_role(group_id, role_name)
+        role = RippleKeycloak::Role.find_by(field: 'name', value: role_name)
+        client.post("groups/#{group_id}/role-mappings/realm", [role])
       end
+
+      def remove_role(group_id, role_name)
+        role = RippleKeycloak::Role.find_by(field: 'name', value: role_name)
+        client.delete("groups/#{group_id}/role-mappings/realm", [role])
+      end
+
+      private
 
       def create_path(parent)
         if parent
@@ -63,17 +37,6 @@ module RippleKeycloak
         end
         path
       end
-
-      # def add_role(group_id, role)
-      #   client.post("groups/#{group_id}/role-mappings/realm", [role])
-      # end
-
-      # def find_role(role)
-      #   role_result = RippleKeycloak::Role.find_by(field: 'name', value: role)
-      #   raise RoleNotFoundError, role unless role_result
-
-      #   role_result
-      # end
     end
   end
 end
