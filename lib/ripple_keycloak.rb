@@ -14,6 +14,7 @@ module RippleKeycloak
   class RealmDoesNotExistError < Error; end
   class GroupNotFoundError < Error; end
   class RoleNotFoundError < Error; end
+  class UserNotFoundError < Error; end
   class MissingPropertyError < Error; end
   class NotFoundError < Error; end
 
