@@ -54,10 +54,14 @@ module RippleKeycloak
         return_or_raise get("#{base_uri}/#{resource}", options)
       end
 
-      def delete_formatted(resource, authed: true, **options)
+      def delete_formatted(resource, json: true, authed: true, **options)
         if authed
           options = add_auth_header(options)
           resource = "admin/realms/#{realm}/" + resource
+        end
+        if json
+          options = add_header(options, 'Content-Type', 'application/json')
+          options[:body] = options[:body].to_json
         end
 
         return_or_raise delete("#{base_uri}/#{resource}", options)
@@ -141,8 +145,8 @@ module RippleKeycloak
       self.class.get_formatted(resource)
     end
 
-    def delete(resource)
-      self.class.delete_formatted(resource)
+    def delete(resource, body = {})
+      self.class.delete_formatted(resource, body: body)
     end
 
     def search(type, value)
@@ -156,7 +160,7 @@ module RippleKeycloak
           return instance if instance[field] == value
         end
       end
-      nil
+      raise NotFoundError, "Object type: #{type}, field: #{field}, value: #{value}"
     end
   end
 end
