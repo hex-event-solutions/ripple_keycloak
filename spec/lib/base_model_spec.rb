@@ -115,7 +115,7 @@ RSpec.describe RippleKeycloak::BaseModel do
       let(:response_body) { [] }
 
       it 'raises an error' do
-        expect { query_model.find_by(field: field, value: value) }.to raise_errorRippleKeycloak::NotFoundError
+        expect { query_model.find_by(field: field, value: value) }.to raise_error RippleKeycloak::NotFoundError
       end
     end
 
@@ -131,7 +131,7 @@ RSpec.describe RippleKeycloak::BaseModel do
       let(:response_body) { single_nonexact_user }
 
       it 'raises an error' do
-        expect { query_model.find_by(field: field, value: value) }.to raise_errorRippleKeycloak::NotFoundError
+        expect { query_model.find_by(field: field, value: value) }.to raise_error RippleKeycloak::NotFoundError
       end
     end
 
