@@ -39,3 +39,4 @@ Style/TrivialAccessors:
 AllCops:
   Exclude:
     - bin/**
+    - vendor/**/**
