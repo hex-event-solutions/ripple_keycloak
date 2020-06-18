@@ -35,3 +35,7 @@ Metrics/BlockLength:
 Style/TrivialAccessors:
   Exclude:
     - lib/ripple_keycloak/base_model.rb
+
+AllCops:
+  Exclude:
+    - bin/**
