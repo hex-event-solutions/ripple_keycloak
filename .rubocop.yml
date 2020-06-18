@@ -27,3 +27,11 @@ Style/SlicingWithRange:
 
 Style/Documentation:
   Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/**
+
+Style/TrivialAccessors:
+  Exclude:
+    - lib/ripple_keycloak/base_model.rb
