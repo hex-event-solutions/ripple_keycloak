@@ -25,7 +25,9 @@ module RippleKeycloak
 
         error_class = error_map[response['error']]
 
-        raise error_class, formatted_error
+        raise error_class, formatted_error unless error_class.nil?
+
+        raise RippleKeycloak::Error, formatted_error
       end
     end
   end
