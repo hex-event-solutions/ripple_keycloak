@@ -1,5 +1,7 @@
 # Ripple Keycloak
 
+![Lint and test](https://github.com/hex-event-solutions/ripple_keycloak/workflows/Lint%20and%20test/badge.svg)
+
 Slim interface focused on groups, roles and users for Keycloak's Admin REST API
 
 ## Installation
