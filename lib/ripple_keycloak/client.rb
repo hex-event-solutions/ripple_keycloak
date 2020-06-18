@@ -24,10 +24,7 @@ module RippleKeycloak
           options = add_auth_header(options)
           resource = "admin/realms/#{realm}/" + resource
         end
-        if json
-          options = add_header(options, 'Content-Type', 'application/json')
-          options[:body] = options[:body].to_json
-        end
+        options = format_as_json(options) if json
 
         return_or_raise post("#{base_uri}/#{resource}", options)
       end
@@ -37,10 +34,7 @@ module RippleKeycloak
           options = add_auth_header(options)
           resource = "admin/realms/#{realm}/" + resource
         end
-        if json
-          options = add_header(options, 'Content-Type', 'application/json')
-          options[:body] = options[:body].to_json
-        end
+        options = format_as_json(options) if json
 
         return_or_raise put("#{base_uri}/#{resource}", options)
       end
@@ -59,43 +53,37 @@ module RippleKeycloak
           options = add_auth_header(options)
           resource = "admin/realms/#{realm}/" + resource
         end
-        if json
-          options = add_header(options, 'Content-Type', 'application/json')
-          options[:body] = options[:body].to_json
-        end
+        options = format_as_json(options) if json
 
         return_or_raise delete("#{base_uri}/#{resource}", options)
       end
 
       private
 
-      attr_accessor :configuration,
-                    :access_token,
-                    :access_token_expiry
+      attr_accessor :configuration, :access_token, :access_token_expiry
 
-      delegate :base_url,
-               :realm,
-               :client_id,
-               :client_secret,
-               to: :configuration
+      delegate :base_url, :realm, :client_id, :client_secret, to: :configuration
 
       delegate :raise_error, to: :error_handler
 
+      def format_as_json(options)
+        options = add_header(options, 'Content-Type', 'application/json')
+        options[:body] = options[:body].to_json
+        options
+      end
+
       def return_or_raise(response)
-        if [200, 201, 204].include? response.code
-          response
-        else
-          raise_error response
-        end
+        return response if [200, 201, 204].include? response.code
+
+        raise_error response
       end
 
       def auth
-        response = post_formatted("realms/#{realm}/protocol/openid-connect/token",
-                                  body: {
-                                    grant_type: 'client_credentials',
-                                    client_id: client_id,
-                                    client_secret: client_secret
-                                  }, json: false, authed: false)
+        response = post_formatted(
+          "realms/#{realm}/protocol/openid-connect/token",
+          body: { grant_type: 'client_credentials', client_id: client_id, client_secret: client_secret },
+          json: false, authed: false
+        )
         update_token_fields response
         access_token
       end
@@ -115,11 +103,9 @@ module RippleKeycloak
 
       def token
         now = Time.now
-        if access_token_expiry < now
-          auth
-        else
-          access_token
-        end
+        return auth if access_token_expiry < now
+
+        access_token
       end
 
       def add_auth_header(options)
@@ -147,20 +133,6 @@ module RippleKeycloak
 
     def delete(resource, body = {})
       self.class.delete_formatted(resource, body: body)
-    end
-
-    def search(type, value)
-      get("#{type}?search=#{value}")
-    end
-
-    def find_by(type, field, value)
-      results = search(type, value).parsed_response
-      if results.is_a? Array
-        results.each do |instance|
-          return instance if instance[field] == value
-        end
-      end
-      raise NotFoundError, "Object type: #{type}, field: #{field}, value: #{value}"
     end
   end
 end

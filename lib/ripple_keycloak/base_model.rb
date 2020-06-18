@@ -10,12 +10,12 @@ module RippleKeycloak
       end
 
       def search(value)
-        client.search(@object_type, value)
+        client.get("#{@object_type}?search=#{value}")
       end
 
       def all(first: nil, max: nil)
         url = "#{@object_type}?"
-        url += "first=#{first}" if first
+        url += "first=#{first}&" if first
         url += "max=#{max}" if max
 
         client.get(url)
@@ -26,7 +26,13 @@ module RippleKeycloak
       end
 
       def find_by(field:, value:)
-        client.find_by(@object_type, field, value)
+        results = search(value).parsed_response
+        if results.is_a? Array
+          results.each do |instance|
+            return instance if instance[field] == value
+          end
+        end
+        raise NotFoundError, "Object type: #{@object_type}, field: #{field}, value: #{value}"
       end
 
       def delete(id)
@@ -40,6 +46,6 @@ module RippleKeycloak
       end
     end
 
-    delegate :base_model, to: :class
+    delegate :object_type, to: :class
   end
 end
