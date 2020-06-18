@@ -40,3 +40,6 @@ AllCops:
   Exclude:
     - bin/**
     - vendor/**/**
+
+Lint/ScriptPermission:
+  Enabled: false
