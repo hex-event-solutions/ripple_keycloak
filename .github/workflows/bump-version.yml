@@ -15,3 +15,8 @@ jobs:
         with:
           version-command: |
             ruby print_version.rb
+      - name: Push any new tags
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tags: true
