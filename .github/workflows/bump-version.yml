@@ -14,4 +14,4 @@ jobs:
       - uses: salsify/action-detect-and-tag-new-version@v1
         with:
           version-command: |
-            cat lib/ripple_keycloak/version.rb
+            ruby print_version.rb
