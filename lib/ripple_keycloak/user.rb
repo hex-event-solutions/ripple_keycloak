@@ -13,10 +13,13 @@ module RippleKeycloak
       end
 
       def add_to_group(user_id, group_id)
-        client.put("users/#{user_id}/groups/#{group_id}", {
-          groupId: group_id,
-          userId: user_id
-        })
+        client.put(
+          "users/#{user_id}/groups/#{group_id}",
+          {
+            groupId: group_id,
+            userId: user_id
+          }
+        )
       end
 
       def remove_from_group(user_id, group_id)
@@ -33,7 +36,7 @@ module RippleKeycloak
         client.delete("users/#{user_id}/role-mappings/realm", [role])
       end
 
-      def send_email(user_id, actions, lifespan: 86400, client_id: false, redirect_uri: false)
+      def send_email(user_id, actions, lifespan: 86_400, client_id: false, redirect_uri: false)
         url = "users/#{user_id}/execute-actions-email?"
         url += "?lifespan=#{lifespan}"
         url += "&client_id=#{client_id}" if client_id
