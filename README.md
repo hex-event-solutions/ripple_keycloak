@@ -1,6 +1,7 @@
 # Ripple Keycloak
 
 ![Lint and test](https://github.com/hex-event-solutions/ripple_keycloak/workflows/Lint%20and%20test/badge.svg)
+[![Gem Version](https://badge.fury.io/rb/ripple_keycloak.svg)](https://badge.fury.io/rb/ripple_keycloak)
 
 Slim interface focused on groups, roles and users for Keycloak's Admin REST API
 
