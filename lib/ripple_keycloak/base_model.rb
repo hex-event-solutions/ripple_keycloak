@@ -10,7 +10,7 @@ module RippleKeycloak
       end
 
       def search(value)
-        client.get("#{@object_type}?search=#{value}")
+        client.get("#{@object_type}?search=#{value}").parsed_response
       end
 
       def all(first: nil, max: nil)
@@ -18,11 +18,11 @@ module RippleKeycloak
         url += "first=#{first}&" if first
         url += "max=#{max}" if max
 
-        client.get(url)
+        client.get(url).parsed_response
       end
 
       def find(id)
-        client.get("#{@object_type}/#{id}")
+        client.get("#{@object_type}/#{id}").parsed_response
       end
 
       def find_by(field:, value:)
@@ -36,7 +36,7 @@ module RippleKeycloak
       end
 
       def delete(id)
-        client.delete("#{@object_type}/#{id}")
+        client.delete("#{@object_type}/#{id}").parsed_response
       end
 
       private
