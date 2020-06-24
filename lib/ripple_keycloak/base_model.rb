@@ -26,7 +26,7 @@ module RippleKeycloak
       end
 
       def find_by(field:, value:)
-        results = search(value).parsed_response
+        results = search(value)
         if results.is_a? Array
           results.each do |instance|
             return instance if instance[field] == value
