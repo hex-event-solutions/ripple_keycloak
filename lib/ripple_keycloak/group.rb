@@ -24,6 +24,10 @@ module RippleKeycloak
         client.delete("groups/#{group_id}/role-mappings/realm", [role])
       end
 
+      def members(group_id)
+        client.get("groups/#{group_id}/members")
+      end
+
       private
 
       def create_path(parent)
